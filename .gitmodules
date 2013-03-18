@@ -1,0 +1,3 @@
+[submodule "res/raw"]
+	path = res/raw
+	url = https://github.com/happygui/happygui-html5.git
