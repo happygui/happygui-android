@@ -48,19 +48,8 @@ public class MainActivity extends Activity {
 
     
     public void loadEditor() throws IOException { // loads the editor into the webview
-    	InputStream ins = getResources().openRawResource(R.raw.editor);
-    	BufferedReader reader = new BufferedReader(new InputStreamReader(ins));
-    	
-    	String str = "";
-		String line;
-		while(true) {
-			line = reader.readLine();
-			if(line==null) break;
-			str = str + line;
-		}
-		
 		webView.getSettings().setJavaScriptEnabled(true);
-		webView.loadDataWithBaseURL("", str, "text/html", "utf-8", "");
+		webView.loadUrl("file:///android_asset/html5/editor.html");
     	jsObject = new JSObject();
 		webView.addJavascriptInterface(jsObject, "jsObject");
     }
