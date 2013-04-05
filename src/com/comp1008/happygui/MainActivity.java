@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
 
 	private WebView webView;
 	private File cameraFile;
-	private JSObject jsObject;
+	private JSObject androidJS;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +54,8 @@ public class MainActivity extends Activity {
 													// webview
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl("file:///android_asset/html5/editor.html");
-		jsObject = new JSObject();
-		webView.addJavascriptInterface(jsObject, "jsObject");
+		androidJS = new JSObject();
+		webView.addJavascriptInterface(androidJS, "jsObject");
 	}
 
 	class JSObject {
@@ -99,12 +99,12 @@ public class MainActivity extends Activity {
 		}
 
 		@JavascriptInterface
-		public void saveFile(String name, String contents) {
-			saveFile(name, contents, "");
+		public void setObject(String name, String contents) {
+			setObject(name, contents, "");
 		}
 		
 		@JavascriptInterface
-		public void saveFile(String name, String contents, String callback) {
+		public void setObject(String name, String contents, String callback) {
 			File file = new File(getDir("pages", MODE_PRIVATE), name);
 
 			try {
@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
 		}
 
 		@JavascriptInterface
-		public void getFileList(String callback) {
+		public void getObjects(String callback) {
 			File folder = getDir("pages", MODE_PRIVATE);
 			File[] list = folder.listFiles();
 			String[] names = new String[list.length];
@@ -129,7 +129,7 @@ public class MainActivity extends Activity {
 		}
 		
 		@JavascriptInterface
-		public void loadFile(String name, String callback) {
+		public void getObject(String name, String callback) {
 			File file = new File(getDir("pages", MODE_PRIVATE), name);
 			try {
 				String text = new Scanner(file).useDelimiter("\\A").next();
@@ -189,7 +189,7 @@ public class MainActivity extends Activity {
 		if (resultCode == RESULT_OK) {
 			if (requestCode == CAMERA_PICTURE_INTENT) {
 				Log.d("onActivityResult", "Activity Result OK!");
-				jsObject.addImage(cameraFile);
+				androidJS.addImage(cameraFile);
 			}
 		}
 	}
