@@ -36,13 +36,15 @@ public class MainActivity extends Activity {
 
 	private WebView webView;
 	private File cameraFile;
-	private JSObject androidJS;
+	public JSObject androidJS;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.splash);
 		webView = new WebView(this);
-		setContentView(webView);
+		webView.setWebViewClient(new MyWebViewClient(this));
+		//setContentView(webView);
 		try {
 			loadEditor();
 		} catch (IOException e) {
@@ -54,132 +56,8 @@ public class MainActivity extends Activity {
 													// webview
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl("file:///android_asset/html5/editor.html");
-		androidJS = new JSObject();
+		androidJS = new JSObject(this, webView);
 		webView.addJavascriptInterface(androidJS, "jsObject");
-	}
-
-	class JSObject {
-		String callback;
-
-		public void callJavascriptFunction(String function, Object... args) {
-			if(function != "") {
-				String url = "javascript:" + function + "(";
-				for (int i = 0; i < args.length; i++) {
-					if (i > 0)
-						url += ",";
-					url += toJavascriptString(args[i]); 
-				}
-				url += ");";
-				log("Calling Javascript Function: " + url);
-				webView.loadUrl(url);
-			}
-		}
-
-		public String toJavascriptString(Object o) {
-			String out;
-			if(o instanceof String) {
-				out = '"' + ((String)o).replaceAll("\"", "\\\"") + '"'; 
-			} else if(o instanceof Object[]){
-				out = "[";
-				for (int i = 0; i < ((Object[])o).length; i++) {
-					if (i > 0)
-						out += ",";
-					out += toJavascriptString(((Object[])o)[i]);
-				}
-				out += "]";
-			} else {
-				out = o.toString();
-			}
-			return out;
-		}
-		
-		@JavascriptInterface
-		public void log(String msg) {
-			Log.d("Javascript", msg);
-		}
-
-		@JavascriptInterface
-		public void setObject(String name, String contents) {
-			setObject(name, contents, "");
-		}
-		
-		@JavascriptInterface
-		public void setObject(String name, String contents, String callback) {
-			File file = new File(getDir("pages", MODE_PRIVATE), name);
-
-			try {
-				FileWriter writer = new FileWriter(file);				
-				writer.write(contents);
-				writer.close();
-				callJavascriptFunction(callback, true);
-			} catch (IOException e) {
-				callJavascriptFunction(callback, false);
-			}
-		}
-
-		@JavascriptInterface
-		public void getObjects(String callback) {
-			File folder = getDir("pages", MODE_PRIVATE);
-			File[] list = folder.listFiles();
-			String[] names = new String[list.length];
-			for (int i = 0; i < list.length; i++) {
-				names[i] = list[i].getName();
-			}
-			callJavascriptFunction(callback, new Object[]{names});
-		}
-		
-		@JavascriptInterface
-		public void getObject(String name, String callback) {
-			File file = new File(getDir("pages", MODE_PRIVATE), name);
-			try {
-				String text = new Scanner(file).useDelimiter("\\A").next();
-				callJavascriptFunction(callback, text);
-			} catch (FileNotFoundException e) {
-				callJavascriptFunction(callback, false);
-			}
-		}
-
-		@JavascriptInterface
-		public void getPhoto(String callback) { // Take a photo and send the
-												// image back to javascript
-			this.callback = callback;
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-					.format(new Date());
-			cameraFile = new File(Environment.getExternalStorageDirectory(),
-					"HappyGUI_capture_" + timeStamp + ".png");
-
-			Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-					Uri.fromFile(cameraFile));
-			startActivityForResult(cameraIntent, CAMERA_PICTURE_INTENT);
-		}
-
-		public void addImage(File imageFile) { // Copies imageFile to local
-												// directory, then passes the
-												// new file URI to javascript
-												// addImage
-			Log.d("JSObject", "Adding image from:" + imageFile.toString());
-
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-					.format(new Date());
-			File newFile = new File(getDir("images", MODE_PRIVATE), "HappyGUI_"
-					+ timeStamp + ".png"); // replace filename with something
-											// more descriptive later.
-			FileChannel src;
-			FileChannel dst;
-			try {
-				src = new FileInputStream(imageFile).getChannel();
-				dst = new FileOutputStream(newFile).getChannel();
-				dst.transferFrom(src, 0, src.size());
-				src.close();
-				dst.close();
-			} catch (Exception e) {
-				Log.d("addPicture", "Error copying picture.");
-			}
-
-			Log.d("JSObject", "Image copied to:" + newFile.toString());
-			callJavascriptFunction(callback, "file://" + newFile.toString());
-		}
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode,
