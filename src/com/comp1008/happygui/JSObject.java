@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -74,12 +76,22 @@ public class JSObject {
 	}
 
 	@JavascriptInterface
-	public void setObject(String name, String contents) {
-		setObject(name, contents, "");
+	public void setObject(String name, String json) {
+		setObject(name, json, "");
 	}
 	
 	@JavascriptInterface
-	public void setObject(String name, String contents, String callback) {
+	public void setObject(String name, String json, String callback) {
+		String contents;
+		try {
+			contents = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_XML);
+		} catch (Exception e) {
+			log("Could not translate JSON");
+			callJavascriptFunction(callback, false);
+			return;
+		}
+		
+		
 		File file = new File(activity.getDir("pages", Context.MODE_PRIVATE), name);
 
 		try {
@@ -88,6 +100,7 @@ public class JSObject {
 			writer.close();
 			callJavascriptFunction(callback, true);
 		} catch (IOException e) {
+			log("Could not save file");
 			callJavascriptFunction(callback, false);
 		}
 	}
@@ -106,10 +119,42 @@ public class JSObject {
 	@JavascriptInterface
 	public void getObject(String name, String callback) {
 		File file = new File(activity.getDir("pages", Context.MODE_PRIVATE), name);
+		String text;
 		try {
-			String text = new Scanner(file).useDelimiter("\\A").next();
-			callJavascriptFunction(callback, text);
+			text = new Scanner(file).useDelimiter("\\A").next();
 		} catch (FileNotFoundException e) {
+			log("File not found!");
+			callJavascriptFunction(callback, false);
+			return;
+		}
+	
+		try {
+			String json = Translator.translate(text, Translator.FORMAT_XML, Translator.FORMAT_JSON);
+			callJavascriptFunction(callback, json);
+		} catch (Exception e) {
+			log("Could not translate");
+			callJavascriptFunction(callback, false);
+		}
+	}
+	
+	@JavascriptInterface
+	public void translateToHTML(String json, String callback) {
+		try {
+			String output = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_HTML);
+			callJavascriptFunction(callback, output);
+		} catch (Exception e) {
+			log("Could not translate");
+			callJavascriptFunction(callback, false);
+		}
+	}
+	
+	@JavascriptInterface
+	public void translateToTouchDevelop(String json, String callback) {
+		try {
+			String output = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_TOUCHDEVELOP);
+			callJavascriptFunction(callback, output);
+		} catch (Exception e) {
+			log("Could not translate");
 			callJavascriptFunction(callback, false);
 		}
 	}

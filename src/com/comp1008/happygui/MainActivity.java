@@ -1,37 +1,15 @@
 package com.comp1008.happygui;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Scanner;
 
-import com.comp1008.happygui.R;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Menu;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
-import android.widget.Gallery;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private WebView webView;
