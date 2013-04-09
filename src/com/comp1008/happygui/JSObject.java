@@ -23,6 +23,8 @@ import android.webkit.WebView;
 
 public class JSObject {
 	public final int CAMERA_PICTURE_INTENT = 1;
+	public final int GALLERY_IMAGE_INTENT = 2;
+	
 	public File cameraFile;
 	
 	private String callback;
@@ -126,6 +128,15 @@ public class JSObject {
 				Uri.fromFile(cameraFile));
 		activity.startActivityForResult(cameraIntent, CAMERA_PICTURE_INTENT);
 	}
+	
+	@JavascriptInterface
+	public void getGalleryImage(String callback) {
+		this.callback = callback;
+		log("getGalleryImage");
+		Intent gallIntent=new Intent(Intent.ACTION_GET_CONTENT);
+		gallIntent.setType("image/*"); 
+		activity.startActivityForResult(gallIntent, GALLERY_IMAGE_INTENT);
+	}
 
 	public void addImage(File imageFile) { // Copies imageFile to local
 											// directory, then passes the
@@ -135,7 +146,7 @@ public class JSObject {
 
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
 				.format(new Date());
-		File newFile = new File(activity.getDir("images", Context.MODE_PRIVATE), "HappyGUI_"
+		File newFile = new File(activity.getDir("images", Context.MODE_PRIVATE), "image_"
 				+ timeStamp + ".png"); // replace filename with something
 										// more descriptive later.
 		FileChannel src;
@@ -146,11 +157,11 @@ public class JSObject {
 			dst.transferFrom(src, 0, src.size());
 			src.close();
 			dst.close();
+			
+			Log.d("JSObject", "Image copied to:" + newFile.toString());
+			callJavascriptFunction(callback, "file://" + newFile.toString());
 		} catch (Exception e) {
 			Log.d("addPicture", "Error copying picture.");
 		}
-
-		Log.d("JSObject", "Image copied to:" + newFile.toString());
-		callJavascriptFunction(callback, "file://" + newFile.toString());
 	}
 }
