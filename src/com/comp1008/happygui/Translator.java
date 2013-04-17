@@ -48,6 +48,7 @@ public class Translator {
 			while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 				switch(parser.getEventType()) {			
 				case XmlPullParser.START_TAG:
+				// Start circle!HTML generation
 					if(parser.getName().equals("CircleElement")) {
 						output += "<circle cx=\"" + parser.getAttributeValue(null, "x")
 								+ "\" cy=\"" + parser.getAttributeValue(null, "y")
@@ -56,6 +57,16 @@ public class Translator {
 								+ "\" stroke=\"" + parser.getAttributeValue(null, "borderColor")
 								+ "\" stroke-width=\"" + parser.getAttributeValue(null, "borderThickness")
 								+ "\" />";
+				// Start rectangle!HTML generation
+					if(parser.getName().equals("RectElement")) {
+						output += "<rect x=\"" + parser.getAttributeValue(null, "x")
+								+ "\" y=\"" + parser.getAttributeValue(null, "y")
+								+ "\" width=\"" + parser.getAttributeValue(null, "width")
+								+ "\" height=\"" + parser.getAttributeValue(null, "height")
+								+ "\" fill=\"" + parser.getAttributeValue(null, "backgroundColor")
+								+ "\" stroke=\"" + parser.getAttributeValue(null, "borderColor")
+								+ "\" stroke-width=\"" + parser.getAttributeValue(null, "borderThickness")
+								+ "\" />";	
 					} else {
 						output += "<!--" + parser.getName() + " tag -->\n";
 					}
@@ -90,6 +101,7 @@ public class Translator {
 		while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			switch(parser.getEventType()) {			
 			case XmlPullParser.START_TAG:
+			// Start circle!touchdevelop generation
 				if(parser.getName().equals("CircleElement")) {
 					output += "page -> fill elipse(" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
@@ -106,6 +118,25 @@ public class Translator {
 							+ ", colors -> from argb (BLARGLIEHDVFJN)"
 							+ ", " + parser.getAttributeValue(null, "borderThickness")
 							+ ")\n";
+				
+				// Start rectangle!touchdevelop generation
+				if(parser.getName().equals("RectElement")) {
+					output += "page -> fill rect(" + parser.getAttributeValue(null, "x")
+							+ ", " + parser.getAttributeValue(null, "y")
+							+ ", " + parser.getAttributeValue(null, "width")
+							+ ", " + parser.getAttributeValue(null, "height")
+							+ ", 0"
+							+ ", colors -> from argb (BLARGLIEHDVFJN)"
+							+ ")\n";
+					output += "page -> draw rect(" + parser.getAttributeValue(null, "x")
+							+ ", " + parser.getAttributeValue(null, "y")
+							+ ", " + parser.getAttributeValue(null, "width")
+							+ ", " + parser.getAttributeValue(null, "height")
+							+ ", 0"
+							+ ", colors -> from argb (BLARGLIEHDVFJN)"
+							+ ", " + parser.getAttributeValue(null, "borderThickness")
+							+ ")\n";
+					
 				} else {
 					output += "// " + parser.getName() + " tag ";
 				}
