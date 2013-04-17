@@ -9,6 +9,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
 public class MainActivity extends Activity {
@@ -30,6 +32,15 @@ public class MainActivity extends Activity {
 	}
 
 	public void loadEditor() throws IOException { // loads the editor into the webview
+		webView.setWebChromeClient(new WebChromeClient() {
+			  public boolean onConsoleMessage(ConsoleMessage cm) {
+			    Log.d("webView", cm.message() + " -- From line "
+			                         + cm.lineNumber() + " of "
+			                         + cm.sourceId() );
+			    return true;
+			  }
+			});
+		
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl("file:///android_asset/html5/editor.html");
 		androidJS = new JSObject(this, webView);
