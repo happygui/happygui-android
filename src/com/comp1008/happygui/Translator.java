@@ -48,8 +48,8 @@ public class Translator {
 			while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 				switch(parser.getEventType()) {			
 				case XmlPullParser.START_TAG:
-				// Start circle!HTML generation
 					if(parser.getName().equals("CircleElement")) {
+						// Start circle!HTML generation
 						output += "<circle cx=\"" + parser.getAttributeValue(null, "x")
 								+ "\" cy=\"" + parser.getAttributeValue(null, "y")
 								+ "\" r=\"" + parser.getAttributeValue(null, "radius")
@@ -57,8 +57,8 @@ public class Translator {
 								+ "\" stroke=\"" + parser.getAttributeValue(null, "borderColor")
 								+ "\" stroke-width=\"" + parser.getAttributeValue(null, "borderThickness")
 								+ "\" />";
-				// Start rectangle!HTML generation
-					if(parser.getName().equals("RectElement")) {
+					} else if(parser.getName().equals("RectElement")) {
+						// Start rectangle!HTML generation
 						output += "<rect x=\"" + parser.getAttributeValue(null, "x")
 								+ "\" y=\"" + parser.getAttributeValue(null, "y")
 								+ "\" width=\"" + parser.getAttributeValue(null, "width")
@@ -101,8 +101,8 @@ public class Translator {
 		while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			switch(parser.getEventType()) {			
 			case XmlPullParser.START_TAG:
-			// Start circle!touchdevelop generation
 				if(parser.getName().equals("CircleElement")) {
+					// Start circle!touchdevelop generation
 					output += "page -> fill elipse(" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", " + parser.getAttributeValue(null, "radius")
@@ -119,8 +119,8 @@ public class Translator {
 							+ ", " + parser.getAttributeValue(null, "borderThickness")
 							+ ")\n";
 				
-				// Start rectangle!touchdevelop generation
-				if(parser.getName().equals("RectElement")) {
+				} else if(parser.getName().equals("RectElement")) {
+					// Start rectangle!touchdevelop generation
 					output += "page -> fill rect(" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", " + parser.getAttributeValue(null, "width")
