@@ -39,6 +39,7 @@ public class JSObject {
 	}
 
 	public void callJavascriptFunction(String function, Object... args) {
+		log("Calling Javascript Function: " + function);
 		if(function != "") {
 			String url = "javascript:" + function + "(";
 			for (int i = 0; i < args.length; i++) {
@@ -55,7 +56,7 @@ public class JSObject {
 	public String toJavascriptString(Object o) {
 		String out;
 		if(o instanceof String) {
-			out = '"' + ((String)o).replaceAll("\"", "\\\"") + '"'; 
+			out = "'" + ((String)o).replaceAll("\"", "\\\"") + "'"; 
 		} else if(o instanceof Object[]){
 			out = "[";
 			for (int i = 0; i < ((Object[])o).length; i++) {
@@ -84,7 +85,8 @@ public class JSObject {
 	public void setObject(String name, String json, String callback) {
 		String contents;
 		try {
-			contents = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_XML);
+			contents = json; 
+			System.out.println(contents);
 		} catch (Exception e) {
 			log("Could not translate JSON");
 			callJavascriptFunction(callback, false);
@@ -122,6 +124,7 @@ public class JSObject {
 		String text;
 		try {
 			text = new Scanner(file).useDelimiter("\\A").next();
+			System.out.println(text);
 		} catch (FileNotFoundException e) {
 			log("File not found!");
 			callJavascriptFunction(callback, false);
@@ -129,7 +132,8 @@ public class JSObject {
 		}
 	
 		try {
-			String json = Translator.translate(text, Translator.FORMAT_XML, Translator.FORMAT_JSON);
+			String json = text;
+			System.out.println(json);
 			callJavascriptFunction(callback, json);
 		} catch (Exception e) {
 			log("Could not translate");
