@@ -67,6 +67,19 @@ public class Translator {
 								+ "\" stroke=\"" + parser.getAttributeValue(null, "borderColor")
 								+ "\" stroke-width=\"" + parser.getAttributeValue(null, "borderThickness")
 								+ "\" />";	
+					} else if(parser.getName().equals("TextElement")) {
+						// Start textbox!HTML generation
+						output += "<div style=\"position: absolute; left:" + parser.getAttributeValue(null, "x")
+								+ "; top:" + parser.getAttributeValue(null, "y")
+								+ "; width:" + parser.getAttributeValue(null, "width")
+								+ "; height:" + parser.getAttributeValue(null, "height")
+								+ "; background-color:" + parser.getAttributeValue(null, "backgroundColor")
+								+ ";\">"
+								+ "<font color=\"" + parser.getAttributeValue(null, "fontColor") // Takes RGB values; needs a method to convert to hex first
+								+ "\" size=\"" + parser.getAttributeValue(null, "fontSize")
+								+ "\">" + parser.getAttributeValue(null, "textContent")
+								+ "</font>"
+								+ "</div>";	
 					} else {
 						output += "<!--" + parser.getName() + " tag -->\n";
 					}
