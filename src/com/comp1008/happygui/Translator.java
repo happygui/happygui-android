@@ -120,6 +120,8 @@ public class Translator {
 		return output;
 	}
 
+	
+	/*
 	public static String xmlToHtml(String input) throws XmlPullParserException, IOException {
 		XmlPullParser parser = Xml.newPullParser();
 		parser.setInput(new StringReader(input));
@@ -176,7 +178,7 @@ public class Translator {
 
 		output += "</body>\n</html>";
 		return output;
-	}
+	}*/
 
 
 
