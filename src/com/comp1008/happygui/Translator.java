@@ -17,15 +17,24 @@ public class Translator {
 	public static final int FORMAT_HTML = 3;
 	public static final int FORMAT_TOUCHDEVELOP = 4;
 
-	public static String translate(String input, int inputFormat, int outputFormat) throws Exception {
-
+	public static String translate(String input, int inputFormat, int outputFormat) throws TranslationException {
 		if(inputFormat == FORMAT_JSON && outputFormat == FORMAT_XML) {
-			JSONObject data = new JSONObject(input);
-			return XML.toString(data);
+			JSONObject data;
+			try {
+				data = new JSONObject(input);
+				return XML.toString(data);
+			} catch (JSONException e) {
+				throw new TranslationException(FORMAT_JSON);
+			}
 		}
 
 		if(inputFormat == FORMAT_XML && outputFormat == FORMAT_JSON) {
-			JSONObject data = XML.toJSONObject(input);
+			JSONObject data;
+			try {
+				data = XML.toJSONObject(input);
+			} catch (JSONException e) {
+				throw new TranslationException(FORMAT_XML);
+			}
 			return data.toString();
 		}
 
@@ -34,12 +43,20 @@ public class Translator {
 		}*/
 
 		if(inputFormat == FORMAT_XML && outputFormat == FORMAT_TOUCHDEVELOP) {
-			return xmlToTouchDevelop(input);
+			try {
+				return xmlToTouchDevelop(input);
+			} catch (XmlPullParserException e) {
+				throw new TranslationException(FORMAT_XML);
+			}
 		}
 
 		if(inputFormat == FORMAT_JSON && outputFormat == FORMAT_TOUCHDEVELOP) {
 			String xml = translate(input, FORMAT_JSON, FORMAT_TOUCHDEVELOP);
-			return xmlToTouchDevelop(xml);
+			try {
+				return xmlToTouchDevelop(xml);
+			} catch (XmlPullParserException e) {
+				throw new TranslationException(FORMAT_XML);
+			}
 		}
 
 		return null;
@@ -49,7 +66,7 @@ public class Translator {
 		return "color -> from argb ( TRANSLATE COLOUR: <" + col + "> )";
 	}
 	
-	public static String xmlToTouchDevelop(String input) throws XmlPullParserException, IOException {
+	public static String xmlToTouchDevelop(String input) throws XmlPullParserException {
 		XmlPullParser parser = Xml.newPullParser();
 		parser.setInput(new StringReader(input));
 
@@ -59,7 +76,7 @@ public class Translator {
 			switch(parser.getEventType()) {			
 			case XmlPullParser.START_TAG:
 				if(parser.getName().equals("CircleElement")) {
-					// Start circle touchdevelop generation
+					// Generate TouchDevelop code for circle
 					output += "page -> fill elipse (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", " + parser.getAttributeValue(null, "radius")
@@ -77,7 +94,7 @@ public class Translator {
 							+ ")\n";
 
 				} else if(parser.getName().equals("RectElement")) {
-					// Start rectangle touchdevelop generation
+					// Generate TouchDevelop code for rectangle
 					output += "page -> fill rect (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", " + parser.getAttributeValue(null, "width")
@@ -95,7 +112,7 @@ public class Translator {
 							+ ")\n";
 
 				}  else if(parser.getName().equals("TextElement")) {
-					// Start text touchdevelop generation
+					// Generate TouchDevelop code for text
 					output += "page -> draw text (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", \"< PUT TEXT HERE >\""
@@ -112,7 +129,11 @@ public class Translator {
 				break;
 			}
 
-			parser.next();
+			try {
+				parser.next();
+			} catch (IOException e) {
+				break;
+			}
 
 		}
 
