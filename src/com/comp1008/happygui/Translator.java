@@ -62,20 +62,23 @@ public class Translator {
 		return null;
 	}
 
+	// Translate a colour from format "rgb(xx,xx,xx)" to "color -> from argb(xx,xx,xx,xx)"
 	public static String colorToTouchDevelop(String col) {
-		return "color -> from argb ( TRANSLATE COLOUR: <" + col + "> )";
+		int left = col.indexOf("(") + 1;
+		return "color -> from argb (0, " + col.substring(left);
 	}
 	
 	public static String xmlToTouchDevelop(String input) throws XmlPullParserException {
 		XmlPullParser parser = Xml.newPullParser();
 		parser.setInput(new StringReader(input));
-
+		int imageNum = 0; // the number of images on the page (for variable naming)
+		
 		String output = "var page := media -> create picture(123,456)\n";
 
 		while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			switch(parser.getEventType()) {			
 			case XmlPullParser.START_TAG:
-				if(parser.getName().equals("CircleElement")) {
+				if(parser.getAttributeValue(null, "type").equals("circle")) {
 					// Generate TouchDevelop code for circle
 					output += "page -> fill elipse (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
@@ -93,7 +96,7 @@ public class Translator {
 							+ ", " + parser.getAttributeValue(null, "borderThickness")
 							+ ")\n";
 
-				} else if(parser.getName().equals("RectElement")) {
+				} else if(parser.getAttributeValue(null, "type").equals("rect")) {
 					// Generate TouchDevelop code for rectangle
 					output += "page -> fill rect (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
@@ -111,7 +114,7 @@ public class Translator {
 							+ ", " + parser.getAttributeValue(null, "borderThickness")
 							+ ")\n";
 
-				}  else if(parser.getName().equals("TextElement")) {
+				}  else if(parser.getAttributeValue(null, "type").equals("text")) {
 					// Generate TouchDevelop code for text
 					output += "page -> draw text (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
@@ -120,8 +123,21 @@ public class Translator {
 							+ ", 0"
 							+ ", " + colorToTouchDevelop(parser.getAttributeValue(null, "fontColor"))
 							+ "))\n";
+				} else if(parser.getAttributeValue(null, "type").equals("image")) {
+					// Generate TouchDevelop code for text
+					imageNum ++;
+					output += "var image" + imageNum + " := web -> download picture (\"<URL>\")\n";
+					output += "image" + imageNum + " -> resize(" + parser.getAttributeValue(null, "width")
+							+ ", " + parser.getAttributeValue(null, "height")
+							+ ")\n";
+					output += "page -> blend (image" + imageNum
+							+ ", " + parser.getAttributeValue(null, "x")
+							+ ", " + parser.getAttributeValue(null, "y")
+							+ ", 0"
+							+ ", 0"
+							+ ")\n";
 				} else {
-					output += "// " + parser.getName() + " tag\n";
+					output += "// " + parser.getAttributeValue(null, "type") + " \n";
 				}
 				break;
 

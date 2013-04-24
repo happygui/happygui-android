@@ -8,6 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -124,7 +127,7 @@ public class JSObject {
 	
 	// Once an image has been removed from the editor, delete the local file.
 	@JavascriptInterface
-	public void removeImage(String src, String callback) {
+	public void delImage(String src, String callback) {
 		this.callback = callback;
 		File file = new File(src);
 		if(file.delete()) {
@@ -136,24 +139,31 @@ public class JSObject {
 	}
 	
 	@JavascriptInterface
-	public void removeImage(String src) {
+	public void delImage(String src) {
 		//no callback
-		removeImage(src, "");
+		delImage(src, "");
 	}
-		
+
 	
-	
-	
-	// Translate a JSON formatted string representing the page to TouchDevelop code, and send to callback. 
+	// Get the TouchDevelop translation for a particular page.
 	@JavascriptInterface
-	public void translateToTouchDevelop(String json, String callback) {
+	public void getTouchDevelop(int pageID, String callback) {
+		File file = new File(webView.getContext().getDir("pages", Context.MODE_PRIVATE), "happy");
+		String text;
 		try {
-			String output = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_TOUCHDEVELOP);
-			callJavascriptFunction(callback, output);
-		} catch (TranslationException e) {
-			log(e.getMessage());
+			//Read the file as a string
+			text = new Scanner(file).useDelimiter("\\A").next();
+			JSONArray data = new JSONArray(text);
+			translateToTouchDevelop(data.get(pageID).toString(), callback);
+		} catch (FileNotFoundException e) {
+			log("File not found!");
 			callbackError();
-		}
+			return;
+		} catch (JSONException e) {
+			log("Could not parse JSON:");
+			callbackError();
+			return;
+		}	
 	}
 
 	
@@ -262,5 +272,15 @@ public class JSObject {
 	}
 	
 	
+	// Translate a JSON formatted string representing the page to TouchDevelop code, and send to callback. 
+	public void translateToTouchDevelop(String json, String callback) {
+		try {
+			String output = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_TOUCHDEVELOP);
+			callJavascriptFunction(callback, output);
+		} catch (TranslationException e) {
+			log(e.getMessage());
+			callbackError();
+		}
+	}
 
 }
