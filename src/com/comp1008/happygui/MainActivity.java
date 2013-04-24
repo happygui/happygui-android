@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
 
 	
 	//Loads the editor into a WebView
-	public void createEditor()  {
+	private void createEditor()  {
 		webView = new WebView(this);
 		webView.setWebViewClient(new HappyGUIWebViewClient());
 		webView.setWebChromeClient(new WebChromeClient() {

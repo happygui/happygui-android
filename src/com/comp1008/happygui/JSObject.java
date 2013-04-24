@@ -52,6 +52,8 @@ public class JSObject {
 	// Save a JSON-formatted string to file "/pages/<name>"
 	@JavascriptInterface
 	public void setObject(String name, String json, String callback) {
+		Log.d("setObject", json);
+		this.callback = callback;
 		String contents = json;
 		/*try {
 			contents = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_XML);
@@ -69,7 +71,7 @@ public class JSObject {
 			writer.close();
 			callJavascriptFunction(callback, true);
 		} catch (IOException e) {
-			log("Could not save file");
+			Log.d("setObject", "Could not save file");
 			callbackError();
 		}
 	}
@@ -99,13 +101,15 @@ public class JSObject {
 	// Call callback with the contents of file "/pages/<name>"
 	@JavascriptInterface
 	public void getObject(String name, String callback) {
+		this.callback = callback;
+		
 		File file = new File(webView.getContext().getDir("pages", Context.MODE_PRIVATE), name);
 		String text;
 		try {
 			//Read the file as a string
 			text = new Scanner(file).useDelimiter("\\A").next();
 		} catch (FileNotFoundException e) {
-			log("File not found!");
+			Log.d("getObject", "File not found!");
 			callbackError();
 			return;
 		}
@@ -128,19 +132,20 @@ public class JSObject {
 	// Once an image has been removed from the editor, delete the local file.
 	@JavascriptInterface
 	public void delImage(String src, String callback) {
+		Log.d("delImage", "delete image: " + src);
 		this.callback = callback;
 		File file = new File(src);
 		if(file.delete()) {
 			callJavascriptFunction(callback, true);
 		} else {
-			log("Failed to delete image file: " + src);
-			callJavascriptFunction(callback, false);
+			Log.d("delImage", "Failed to delete image file: " + src);
+			callbackError();
 		}
 	}
 	
 	@JavascriptInterface
 	public void delImage(String src) {
-		//no callback
+		//no callback)
 		delImage(src, "");
 	}
 
@@ -148,19 +153,21 @@ public class JSObject {
 	// Get the TouchDevelop translation for a particular page.
 	@JavascriptInterface
 	public void getTouchDevelop(int pageID, String callback) {
+		Log.d("getTouchDevelop", "Getting TouchDevelop code for page " + pageID);
 		File file = new File(webView.getContext().getDir("pages", Context.MODE_PRIVATE), "happy");
 		String text;
 		try {
 			//Read the file as a string
-			text = new Scanner(file).useDelimiter("\\A").next();
+			Scanner s = new Scanner(file).useDelimiter("\\A");
+			text = s.next();
 			JSONArray data = new JSONArray(text);
 			translateToTouchDevelop(data.get(pageID).toString(), callback);
 		} catch (FileNotFoundException e) {
-			log("File not found!");
+			Log.d("getTouchDevelop","happy file does not exist!");
 			callbackError();
 			return;
 		} catch (JSONException e) {
-			log("Could not parse JSON:");
+			Log.d("getTouchDevelop","Could not parse happy file:");
 			callbackError();
 			return;
 		}	
@@ -236,7 +243,7 @@ public class JSObject {
 	
 	// Call a javascript function in the webview from java
 	public void callJavascriptFunction(String function, Object... args) {
-		log("Calling Javascript Function: " + function);
+		Log.d("callJavascriptFunction","Calling: " + function);
 	
 		if(! function.equalsIgnoreCase("")) {
 			String url = "javascript:" + function + "(";
@@ -246,7 +253,7 @@ public class JSObject {
 				url += toJavascriptString(args[i]); 
 			}
 			url += ");";
-			log("URL: " + url);
+			Log.d("callJavascriptFunction","... with url: " + url);
 			webView.loadUrl(url);
 		}
 	}
@@ -274,11 +281,13 @@ public class JSObject {
 	
 	// Translate a JSON formatted string representing the page to TouchDevelop code, and send to callback. 
 	public void translateToTouchDevelop(String json, String callback) {
+		this.callback = callback;
 		try {
 			String output = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_TOUCHDEVELOP);
+			Log.d("translateToTouchDevelop", "Translated to touch develop:\n" + output);
 			callJavascriptFunction(callback, output);
 		} catch (TranslationException e) {
-			log(e.getMessage());
+			Log.d("translateToTouchDevelop", e.getMessage());
 			callbackError();
 		}
 	}
