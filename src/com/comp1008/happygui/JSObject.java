@@ -49,26 +49,23 @@ public class JSObject {
 	}	
 	
 	
-	// Save a JSON-formatted string to file "/pages/<name>"
+	// Save JSON to file "/pages/<name>"
 	@JavascriptInterface
 	public void setObject(String name, String json, String callback) {
 		Log.d("setObject", json);
 		this.callback = callback;
+		
 		String contents = json;
 		/*try {
 			contents = Translator.translate(json, Translator.FORMAT_JSON, Translator.FORMAT_XML);
 		} catch (Exception e) {
 			log("Could not translate JSON");
-			callbackError();
+		2	callbackError();
 			return;
 		}*/
 		
-		File file = new File(webView.getContext().getDir("pages", Context.MODE_PRIVATE), name);
-		
 		try {
-			FileWriter writer = new FileWriter(file);				
-			writer.write(contents);
-			writer.close();
+			FileHandler.saveData(name, contents);
 			callJavascriptFunction(callback, true);
 		} catch (IOException e) {
 			Log.d("setObject", "Could not save file");
@@ -88,13 +85,8 @@ public class JSObject {
 	// Call callback with a JSON-formatted directory listing of /pages 
 	@JavascriptInterface
 	public void getObjects(String callback) {
-		File folder = webView.getContext().getDir("pages", Context.MODE_PRIVATE);
-		File[] list = folder.listFiles();
-		String[] names = new String[list.length];
-		for (int i = 0; i < list.length; i++) {
-			names[i] = list[i].getName();
-		}
-		callJavascriptFunction(callback, new Object[]{names});
+		String[] pages = FileHandler.getPageList();
+		callJavascriptFunction(callback, new Object[]{pages});
 	}
 	
 	
@@ -102,20 +94,16 @@ public class JSObject {
 	@JavascriptInterface
 	public void getObject(String name, String callback) {
 		this.callback = callback;
-		
-		File file = new File(webView.getContext().getDir("pages", Context.MODE_PRIVATE), name);
-		String text;
+
 		try {
-			//Read the file as a string
-			text = new Scanner(file).useDelimiter("\\A").next();
+			String text = FileHandler.getData(name); //Read the file as a string
+			callJavascriptFunction(callback, text);
 		} catch (FileNotFoundException e) {
 			Log.d("getObject", "File not found!");
 			callbackError();
 			return;
 		}
-	
-		
-		callJavascriptFunction(callback, text);
+			
 		/*
 		try {
 			String json = Translator.translate(text, Translator.FORMAT_XML, Translator.FORMAT_JSON);
@@ -134,8 +122,8 @@ public class JSObject {
 	public void delImage(String src, String callback) {
 		Log.d("delImage", "delete image: " + src);
 		this.callback = callback;
-		File file = new File(src);
-		if(file.delete()) {
+		
+		if(FileHandler.deleteFile(src)) {
 			callJavascriptFunction(callback, true);
 		} else {
 			Log.d("delImage", "Failed to delete image file: " + src);
@@ -150,18 +138,18 @@ public class JSObject {
 	}
 
 	
-	// Get the TouchDevelop translation for a particular page.
+	// Get the TouchDevelop translation for a particular page 
 	@JavascriptInterface
 	public void getTouchDevelop(int pageID, String callback) {
 		Log.d("getTouchDevelop", "Getting TouchDevelop code for page " + pageID);
 		File file = new File(webView.getContext().getDir("pages", Context.MODE_PRIVATE), "happy");
-		String text;
+		// <file> contains all of the user's pages:
+		
 		try {
-			//Read the file as a string
 			Scanner s = new Scanner(file).useDelimiter("\\A");
-			text = s.next();
-			JSONArray data = new JSONArray(text);
-			translateToTouchDevelop(data.get(pageID).toString(), callback);
+			String text = s.next(); 										// Read in the whole file as a string
+			JSONArray data = new JSONArray(text); 							// Convert the file into a JSONArray of pages
+			translateToTouchDevelop(data.get(pageID).toString(), callback); // Translate item #<pageId> in the array
 		} catch (FileNotFoundException e) {
 			Log.d("getTouchDevelop","happy file does not exist!");
 			callbackError();
@@ -194,7 +182,7 @@ public class JSObject {
 		
 		String timeStamp = SimpleDateFormat.getDateTimeInstance().format(new Date());
 		cameraFile = new File(Environment.getExternalStorageDirectory(), "HappyGUI_capture_" + timeStamp + ".png");
-		// Initially saves the photo in external storage, as the user might want to keep it.
+		// Initially saves the photo in external storage, as the user may want to keep it outside of the application.
 		
 		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(cameraFile));
@@ -241,11 +229,11 @@ public class JSObject {
 	}
 	
 	
-	// Call a javascript function in the webview from java
+	// Call a javascript function in the webview
 	public void callJavascriptFunction(String function, Object... args) {
 		Log.d("callJavascriptFunction","Calling: " + function);
 	
-		if(! function.equalsIgnoreCase("")) {
+		if(! function.equalsIgnoreCase("")) { // Only call if the function is not empty
 			String url = "javascript:" + function + "(";
 			for (int i = 0; i < args.length; i++) {
 				if (i > 0)
@@ -263,10 +251,10 @@ public class JSObject {
 	private String toJavascriptString(Object o) {
 		String out;
 		if(o instanceof String) {
-			out = "'" + ((String)o).replaceAll("\"", "\\\"") + "'"; 
+			out = "'" + ((String)o).replaceAll("\"", "\\\"") + "'"; // Escape any " marks in strings, and surround with 's 
 		} else if(o instanceof Object[]){
 			out = "[";
-			for (int i = 0; i < ((Object[])o).length; i++) {
+			for (int i = 0; i < ((Object[])o).length; i++) {	// Represent arrays in [1, 2, 3] format
 				if (i > 0)
 					out += ",";
 				out += toJavascriptString(((Object[])o)[i]);

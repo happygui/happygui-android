@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splash); //Display the splash screen while waiting for the editor to load
+		FileHandler.setContext(this);
 		createEditor();
 	}
 
@@ -84,24 +85,12 @@ public class MainActivity extends Activity {
 	private void addImage(File imageFile) {
 		Log.d("addImage", "Adding image from:" + imageFile.toString());
 
-		String timeStamp = SimpleDateFormat.getDateTimeInstance().format(new Date());
-		//Create a new file in "/images/image_<TIMESTAMP>.png" to hold the image
-		File newFile = new File(webView.getContext().getDir("images", Context.MODE_PRIVATE), "image_" + timeStamp + ".png");
-		
-		
-		FileChannel src;
-		FileChannel dst;
-		
 		try {
 			// Copy the image to the new location
-			src = new FileInputStream(imageFile).getChannel();
-			dst = new FileOutputStream(newFile).getChannel();
-			dst.transferFrom(src, 0, src.size());
-			src.close();
-			dst.close();
-
-			Log.d("addImage", "Image copied to:" + newFile.toString());
-			androidJS.gotImage("file://" + newFile.toString());
+			String newLocation = FileHandler.copyImage(imageFile).toString();
+			Log.d("addImage", "Image copied to:" + newLocation);
+			// Send the location of the new file to the editor
+			androidJS.gotImage("file://" + newLocation);
 		} catch (Exception e) {
 			Log.d("addImage", "Failed to copy image.");
 			androidJS.callbackError();

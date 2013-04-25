@@ -75,6 +75,7 @@ public class Translator {
 	
 	public static String jsonToTouchDevelop(String input) throws TranslationException {
 		JSONObject data;
+		
 		try {
 			data = new JSONObject(input);
 			int imageNum = 0; // the number of images on the page (for variable naming)
