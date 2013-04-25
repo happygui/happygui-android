@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+// Helper class for translating between formats / languages
 public class Translator {
 	public static final int FORMAT_JSON = 1;
 	public static final int FORMAT_XML = 2;
@@ -72,7 +73,7 @@ public class Translator {
 	
 	
 	
-	
+	//convert json-formatted description of a page to touchdevelop code
 	public static String jsonToTouchDevelop(String input) throws TranslationException {
 		JSONObject data;
 		
@@ -87,65 +88,75 @@ public class Translator {
 			output += "var page := media -> create picture(480, 600)\n";
 			
 			JSONArray elements = data.getJSONArray("elements");
+			// Loop through list of elements in the page
 			for(int i=0; i<elements.length(); i++) {
 				JSONObject element = elements.optJSONObject(i);
 				if(element != null && element.has("type")) {
-					String type = element.optString("type");
+					
+					String type = element.optString("type");	// The element type
 					if(type == null) {
 						continue;
 					} else if(type.equals("circle")) {
 						// Generate TouchDevelop code for circle
 						int x = Integer.parseInt(element.get("x").toString());
 						int y = Integer.parseInt(element.get("y").toString());
-						int r = Integer.parseInt(element.get("r").toString());
+						int r = Integer.parseInt(element.get("r").toString()); //circle radius
 						
-						output += "page -> fill ellipse (" + (x - r)
-								+ ", " + (y - r)
-								+ ", " + (2 * r)
-								+ ", " + (2 * r)
-								+ ", 0"
-								+ ", " + colorToTouchDevelop(element.get("backgroundColor").toString(), 0.8)
+						// first draw fill
+						output += "page -> fill ellipse (" + (x - r)	// left
+								+ ", " + (y - r)						// top
+								+ ", " + (2 * r)						// width
+								+ ", " + (2 * r)						// height
+								+ ", 0"									// angle
+								+ ", " + colorToTouchDevelop(element.get("backgroundColor").toString(), 0.8) // fill colour
 								+ ")\n";
 						
-						output += "page -> draw ellipse (" + (x - r)
-								+ ", " + (y - r)
-								+ ", " + (2 * r)
-								+ ", " + (2 * r)
-								+ ", 0"
-								+ ", " + colorToTouchDevelop(element.get("borderColor").toString(), 0.8)
-								+ ", " + element.get("borderThickness").toString()
+						// ...then draw border
+						output += "page -> draw ellipse (" + (x - r)	// left
+								+ ", " + (y - r)						// top
+								+ ", " + (2 * r)						// width
+								+ ", " + (2 * r)						// height
+								+ ", 0"									// angle
+								+ ", " + colorToTouchDevelop(element.get("borderColor").toString(), 0.8)	// border colour
+								+ ", " + element.get("borderThickness").toString()							// border thickness
 								+ ")\n";
 
 					} else if(type.equals("rect")) {
 						// Generate TouchDevelop code for rectangle
-						output += "page -> fill rect (" + element.get("x").toString()
-								+ ", " + element.get("y").toString()
-								+ ", " + element.get("width").toString()
-								+ ", " + element.get("height").toString()
-								+ ", 0"
-								+ ", " + colorToTouchDevelop(element.get("backgroundColor").toString(), 0.8)
+						
+						// first draw fill
+						output += "page -> fill rect (" + element.get("x").toString()	// left
+								+ ", " + element.get("y").toString()					// top
+								+ ", " + element.get("width").toString()				// width
+								+ ", " + element.get("height").toString()				// height
+								+ ", 0"													// angle
+								+ ", " + colorToTouchDevelop(element.get("backgroundColor").toString(), 0.8)	//fill colour
 								+ ")\n";
-						output += "page -> draw rect (" + element.get("x").toString()
-								+ ", " + element.get("y").toString()
-								+ ", " + element.get("width").toString()
-								+ ", " + element.get("height").toString()
-								+ ", 0"
-								+ ", " + colorToTouchDevelop(element.get("borderColor").toString(), 0.8)
-								+ ", " + element.get("borderThickness").toString()
+						
+						// ... then draw border
+						output += "page -> draw rect (" + element.get("x").toString()	// left
+								+ ", " + element.get("y").toString()					// top
+								+ ", " + element.get("width").toString()				// width
+								+ ", " + element.get("height").toString()				// height
+								+ ", 0"													// angle
+								+ ", " + colorToTouchDevelop(element.get("borderColor").toString(), 0.8)	// border colour
+								+ ", " + element.get("borderThickness").toString()							// border thickness
 								+ ")\n";
 
 					}  else if(type.equals("text")) {
 						// Generate TouchDevelop code for text
-						output += "page -> draw text (" + element.get("x").toString()
-								+ ", " + element.get("y").toString()
-								+ ", \"PUT TEXT HERE\""
-								+ ", " + element.get("fontSize").toString()
-								+ ", 0"
-								+ ", " + colorToTouchDevelop(element.get("fontColor").toString(), 0.8)
+						
+						output += "page -> draw text (" + element.get("x").toString()	// left
+								+ ", " + element.get("y").toString()					// top
+								+ ", \"PUT TEXT HERE\""									// text
+								+ ", " + element.get("fontSize").toString()				// font size
+								+ ", 0"													// angle
+								+ ", " + colorToTouchDevelop(element.get("fontColor").toString(), 0.8)	// colour
 								+ "))\n";
 						
 					} else if(type.equals("image")) {
 						// Generate TouchDevelop code for image
+						
 						imageNum ++;
 						output += "var image" + imageNum + " := web -> download picture (\"Image " + imageNum + " URL\")\n";
 						output += "image" + imageNum + " -> resize(" + element.get("width").toString()
@@ -154,12 +165,12 @@ public class Translator {
 						output += "page -> blend (image" + imageNum
 								+ ", " + element.get("x").toString()
 								+ ", " + element.get("y").toString()
-								+ ", 0"
-								+ ", 1"
+								+ ", 0"	// angle
+								+ ", 1" // opacity
 								+ ")\n";
 						
 					} else {
-						output += "// " + type + " \n";
+						output += "// " + type + " \n";	// element of unknown type
 					}
 				}
 			}

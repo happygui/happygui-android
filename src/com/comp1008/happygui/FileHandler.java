@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+// Helper class for manipulating files on the device
 public class FileHandler {
 	private static Context context;
 	
