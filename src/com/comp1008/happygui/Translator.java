@@ -148,7 +148,7 @@ public class Translator {
 						
 						output += "page -> draw text (" + element.get("x").toString()	// left
 								+ ", " + element.get("y").toString()					// top
-								+ ", " + element.get("text").toString()						// text
+								+ ", \"" + element.get("text").toString() + "\""		// text
 								+ ", " + element.get("fontSize").toString()				// font size
 								+ ", 0"													// angle
 								+ ", " + colorToTouchDevelop(element.get("fontColor").toString(), 0.8)	// colour
