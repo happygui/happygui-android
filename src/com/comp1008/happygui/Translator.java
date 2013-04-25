@@ -81,11 +81,11 @@ public class Translator {
 			data = new JSONObject(input);
 			int imageNum = 0; // the number of images on the page (for variable naming)
 			
-			String output = "action main()\n";
+			String output = "action main()<br/>";
 			if(data.has("backgroundColor")) {
-				output += "wall -> set background(" + colorToTouchDevelop(data.get("backgroundColor").toString(), 1) + ")\n";
+				output += "wall -> set background(" + colorToTouchDevelop(data.get("backgroundColor").toString(), 1) + ")<br/>";
 			}
-			output += "var page := media -> create picture(480, 600)\n";
+			output += "var page := media -> create picture(480, 600)<br/>";
 			
 			JSONArray elements = data.getJSONArray("elements");
 			// Loop through list of elements in the page
@@ -109,7 +109,7 @@ public class Translator {
 								+ ", " + (2 * r)						// height
 								+ ", 0"									// angle
 								+ ", " + colorToTouchDevelop(element.get("backgroundColor").toString(), 0.8) // fill colour
-								+ ")\n";
+								+ ")<br/>";
 						
 						// ...then draw border
 						output += "page -> draw ellipse (" + (x - r)	// left
@@ -119,7 +119,7 @@ public class Translator {
 								+ ", 0"									// angle
 								+ ", " + colorToTouchDevelop(element.get("borderColor").toString(), 0.8)	// border colour
 								+ ", " + element.get("borderThickness").toString()							// border thickness
-								+ ")\n";
+								+ ")<br/>";
 
 					} else if(type.equals("rect")) {
 						// Generate TouchDevelop code for rectangle
@@ -131,7 +131,7 @@ public class Translator {
 								+ ", " + element.get("height").toString()				// height
 								+ ", 0"													// angle
 								+ ", " + colorToTouchDevelop(element.get("backgroundColor").toString(), 0.8)	//fill colour
-								+ ")\n";
+								+ ")<br/>";
 						
 						// ... then draw border
 						output += "page -> draw rect (" + element.get("x").toString()	// left
@@ -141,43 +141,42 @@ public class Translator {
 								+ ", 0"													// angle
 								+ ", " + colorToTouchDevelop(element.get("borderColor").toString(), 0.8)	// border colour
 								+ ", " + element.get("borderThickness").toString()							// border thickness
-								+ ")\n";
+								+ ")<br/>";
 
 					}  else if(type.equals("text")) {
 						// Generate TouchDevelop code for text
 						
 						output += "page -> draw text (" + element.get("x").toString()	// left
 								+ ", " + element.get("y").toString()					// top
-								+ ", \"PUT TEXT HERE\""									// text
+								+ ", " + element.get("text").toString()						// text
 								+ ", " + element.get("fontSize").toString()				// font size
 								+ ", 0"													// angle
 								+ ", " + colorToTouchDevelop(element.get("fontColor").toString(), 0.8)	// colour
-								+ "))\n";
+								+ "))<br/>";
 						
 					} else if(type.equals("image")) {
 						// Generate TouchDevelop code for image
 						
 						imageNum ++;
-						output += "var image" + imageNum + " := web -> download picture (\"Image " + imageNum + " URL\")\n";
+						output += "var image" + imageNum + " := web -> download picture (\"Image " + imageNum + " URL\")<br/>";
 						output += "image" + imageNum + " -> resize(" + element.get("width").toString()
 								+ ", " + element.get("height").toString()
-								+ ")\n";
+								+ ")<br/>";
 						output += "page -> blend (image" + imageNum
 								+ ", " + element.get("x").toString()
 								+ ", " + element.get("y").toString()
 								+ ", 0"	// angle
 								+ ", 1" // opacity
-								+ ")\n";
+								+ ")<br/>";
 						
 					} else {
-						output += "// " + type + " \n";	// element of unknown type
+						output += "// " + type + " <br/>";	// element of unknown type
 					}
 				}
 			}
 			
 			
 			output += "page -> post to wall";
-			
 			return output;
 			
 		} catch (JSONException e) {
@@ -216,14 +215,14 @@ public class Translator {
 		int imageNum = 0; // the number of images on the page (for variable naming)
 		
 		String output = "action main()";
-		output += "var page := media -> create picture(480, 600)\n";
+		output += "var page := media -> create picture(480, 600)<br/>";
 
 		while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			switch(parser.getEventType()) {			
 			case XmlPullParser.START_TAG:
 				String type = parser.getAttributeValue(null, "type");
 				if(type == null) {
-					output += "// " + parser.getName() + " tag" + " \n";
+					output += "// " + parser.getName() + " tag" + " <br/>";
 					for(int i=0; i<parser.getAttributeCount(); i++) {
 						output += "// - " + parser.getAttributeName(i) + ": " + parser.getAttributeValue(i);
 					}
@@ -237,7 +236,7 @@ public class Translator {
 							+ ", " + parser.getAttributeValue(null, "radius")
 							+ ", 0"
 							+ ", " + colorToTouchDevelop(parser.getAttributeValue(null, "backgroundColor"), 0.8)
-							+ ")\n";
+							+ ")<br/>";
 					output += "page -> draw ellipse (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", " + parser.getAttributeValue(null, "radius")
@@ -245,7 +244,7 @@ public class Translator {
 							+ ", 0"
 							+ ", " + colorToTouchDevelop(parser.getAttributeValue(null, "borderColor"), 0.8)
 							+ ", " + parser.getAttributeValue(null, "borderThickness")
-							+ ")\n";
+							+ ")<br/>";
 
 				} else if(type.equals("rect")) {
 					// Generate TouchDevelop code for rectangle
@@ -255,7 +254,7 @@ public class Translator {
 							+ ", " + parser.getAttributeValue(null, "height")
 							+ ", 0"
 							+ ", " + colorToTouchDevelop(parser.getAttributeValue(null, "backgroundColor"), 0.8)
-							+ ")\n";
+							+ ")<br/>";
 					output += "page -> draw rect (" + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", " + parser.getAttributeValue(null, "width")
@@ -263,7 +262,7 @@ public class Translator {
 							+ ", 0"
 							+ ", " + colorToTouchDevelop(parser.getAttributeValue(null, "borderColor"), 0.8)
 							+ ", " + parser.getAttributeValue(null, "borderThickness")
-							+ ")\n";
+							+ ")<br/>";
 
 				}  else if(type.equals("text")) {
 					// Generate TouchDevelop code for text
@@ -273,22 +272,22 @@ public class Translator {
 							+ ", " + parser.getAttributeValue(null, "fontSize")
 							+ ", 0"
 							+ ", " + colorToTouchDevelop(parser.getAttributeValue(null, "fontColor"), 0.8)
-							+ "))\n";
+							+ "))<br/>";
 				} else if(type.equals("image")) {
 					// Generate TouchDevelop code for image
 					imageNum ++;
-					output += "var image" + imageNum + " := web -> download picture (\"<URL>\")\n";
+					output += "var image" + imageNum + " := web -> download picture (\"<URL>\")<br/>";
 					output += "image" + imageNum + " -> resize(" + parser.getAttributeValue(null, "width")
 							+ ", " + parser.getAttributeValue(null, "height")
-							+ ")\n";
+							+ ")<br/>";
 					output += "page -> blend (image" + imageNum
 							+ ", " + parser.getAttributeValue(null, "x")
 							+ ", " + parser.getAttributeValue(null, "y")
 							+ ", 0"
 							+ ", 0"
-							+ ")\n";
+							+ ")<br/>";
 				} else {
-					output += "// " + type + " \n";
+					output += "// " + type + " <br/>";
 				}
 				break;
 
@@ -314,7 +313,7 @@ public class Translator {
 		XmlPullParser parser = Xml.newPullParser();
 		parser.setInput(new StringReader(input));
 
-		String output = "<html>\n<body>\n";
+		String output = "<html><br/><body><br/>";
 
 		while(parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			switch(parser.getEventType()) {			
@@ -352,7 +351,7 @@ public class Translator {
 							+ "</font>"
 							+ "</div>";	
 				} else {
-					output += "<!--" + parser.getName() + " tag -->\n";
+					output += "<!--" + parser.getName() + " tag --><br/>";
 				}
 				break;
 
@@ -364,7 +363,7 @@ public class Translator {
 
 		}
 
-		output += "</body>\n</html>";
+		output += "</body><br/></html>";
 		return output;
 	}*/
 
