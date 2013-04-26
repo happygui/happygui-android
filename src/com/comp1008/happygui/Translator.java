@@ -162,6 +162,7 @@ public class Translator {
 						output += "image" + imageNum + " -> resize(" + element.get("width").toString()
 								+ ", " + element.get("height").toString()
 								+ ")<br/>";
+						
 						output += "page -> blend (image" + imageNum
 								+ ", " + element.get("x").toString()
 								+ ", " + element.get("y").toString()
